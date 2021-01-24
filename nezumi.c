@@ -69,7 +69,14 @@ void load_page(char *url) {
     set_header_text(gsite->meta->url);
 
     for (unsigned int i = 0; i < gsite->meta->linecount; i++) {
+        if (gsite->lines[i]->ltype == error) {
+            attron(COLOR_PAIR(1));
+        } else if (gsite->lines[i]->ltype != information) {
+            attron(COLOR_PAIR(2));
+        }
         mvwaddstr(stdscr, i + 1, 0, gsite->lines[i]->text);
+        attroff(COLOR_PAIR(1));
+        attroff(COLOR_PAIR(2));
     }
 
     refresh();
