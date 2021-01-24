@@ -1,0 +1,19 @@
+#ifndef NETWORKING_H
+#define NETWORKING_H
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+#include "parser.h"
+
+char **loadgopher(struct pageinfo *target);
+struct pageinfo *parseurl(char *url);
+struct simplepage *handleloadrequest(char *url);
+
+#endif /* NETWORKING_H */
