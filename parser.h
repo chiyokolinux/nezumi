@@ -50,5 +50,6 @@ struct simplepage {
 };
 
 struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata);
+struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata);
 
 #endif /* PARSER_H */

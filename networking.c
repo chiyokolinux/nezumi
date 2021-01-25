@@ -209,3 +209,49 @@ struct simplepage *handleloadrequest(char *url) {
 
     return parsedfinal;
 }
+
+struct simplepage *followlink(struct simplepage *current, unsigned int linum) {
+    struct pageinfo *meta = malloc(sizeof(struct pageinfo));
+
+    *meta = (struct pageinfo) {
+        .scheme = current->meta->scheme, /* followlink() stays on gopher protocol */
+        .host = current->lines[linum]->host,
+        .port = current->lines[linum]->port,
+        .path = current->lines[linum]->magicString,
+        .url = current->lines[linum]->host, /* TODO: construct fancy url */
+        .title = NULL, /* title isn't used */
+        .linecount = 0
+    };
+
+    char **lines = loadgopher(meta);
+    if (lines == NULL) {
+        return NULL;
+    }
+
+    struct simplepage *parsedfinal = parsegopher(lines, meta);
+
+    return parsedfinal;
+}
+
+struct simplepage *followplain(struct simplepage *current, unsigned int linum) {
+    struct pageinfo *meta = malloc(sizeof(struct pageinfo));
+
+    *meta = (struct pageinfo) {
+        .scheme = current->meta->scheme, /* followlink() stays on gopher protocol */
+        .host = current->lines[linum]->host,
+        .port = current->lines[linum]->port,
+        .path = current->lines[linum]->magicString,
+        .url = current->lines[linum]->host, /* TODO: construct fancy url */
+        .title = NULL, /* title isn't used */
+        .linecount = 0
+    };
+
+    char **lines = loadgopher(meta);
+    if (lines == NULL) {
+        return NULL;
+    }
+
+    struct simplepage *parsedfinal = parseplain(lines, meta);
+
+    return parsedfinal;
+}

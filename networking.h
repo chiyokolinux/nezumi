@@ -15,5 +15,7 @@
 char **loadgopher(struct pageinfo *target);
 struct pageinfo *parseurl(char *url);
 struct simplepage *handleloadrequest(char *url);
+struct simplepage *followlink(struct simplepage *current, unsigned int linum);
+struct simplepage *followplain(struct simplepage *current, unsigned int linum);
 
 #endif /* NETWORKING_H */

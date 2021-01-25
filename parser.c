@@ -65,7 +65,7 @@ struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
                 ltype = soundfile;
                 break;
             default:
-                fprintf(stderr, "error: page %s ( at %s ) contains unknown line type!", metadata->title, metadata->url);
+                fprintf(stderr, "error: page %s ( at %s ) contains unknown line type %c!\n", metadata->path, metadata->url, responsetext[i][0]);
                 ltype = error;
                 break;
         }
@@ -91,6 +91,33 @@ struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
                 currentval++;
             }
         }
+
+        lines[i] = cline;
+    }
+
+    return parsedpage;
+}
+
+struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata) {
+    struct typedline **lines = malloc(sizeof(struct typedline *) * metadata->linecount);
+    struct simplepage *parsedpage = malloc(sizeof(struct simplepage));
+    *parsedpage = (struct simplepage){ .lines = lines, .meta = metadata };
+    unsigned int i;
+
+    for (i = 0; i < metadata->linecount; i++) {
+        /* in plain text, everything is of type information */
+        enum linetype ltype = information;
+
+        struct typedline *cline = malloc(sizeof(struct typedline));
+
+        cline->ltype = ltype;
+        cline->text = responsetext[i] + 1; /* pop first char */
+
+        char *empty = malloc(sizeof(char));
+        *empty = '\0';
+        cline->magicString = empty;
+        cline->host = empty;
+        cline->port = empty;
 
         lines[i] = cline;
     }

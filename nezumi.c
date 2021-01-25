@@ -115,6 +115,24 @@ void mainloop() {
                 y = 1;
                 scrollf = 0;
                 break;
+            case ' ':
+            case KEY_ENTER:
+            case 'f':
+                if (currentsite->lines[y - 1 + scrollf]->ltype == file) {
+                    currentsite = followplain(currentsite, y - 1 + scrollf);
+                    scrollf = 0;
+                    x = 5;
+                    y = 1;
+                    scroll_current(0);
+                } else if (currentsite->lines[y - 1 + scrollf]->ltype == directory ||
+                           currentsite->lines[y - 1 + scrollf]->ltype == duplicate) {
+                    currentsite = followlink(currentsite, y - 1 + scrollf);
+                    scrollf = 0;
+                    x = 5;
+                    y = 1;
+                    scroll_current(0);
+                }
+                break;
         }
 
         move(y, x);
