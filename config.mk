@@ -7,6 +7,6 @@ MANPREFIX = $(PREFIX)/share/man
 CC = gcc
 LD = $(CC)
 CPPFLAGS =
-CFLAGS   = -Wextra -Wall -Os -g
-LDFLAGS  = # -s
+CFLAGS   = -Wextra -Wall -Os -std=gnu89
+LDFLAGS  = -s
 LDLIBS   = -lncurses

@@ -18,7 +18,7 @@ char **loadgopher(struct pageinfo *target) {
 
     /* build socket vars & opts */
     int sockfd = -1, err, count;
-    struct addrinfo opts = {}, *resolved;
+    struct addrinfo opts = {}, *resolved, *addr;
     opts.ai_family = AF_UNSPEC; /* we want both IPv4 and IPv6 */
     opts.ai_socktype = SOCK_STREAM;
     opts.ai_protocol = IPPROTO_TCP;
@@ -31,7 +31,7 @@ char **loadgopher(struct pageinfo *target) {
     }
     
     /* create socket */
-    for(struct addrinfo *addr = resolved; addr != NULL; addr = addr->ai_next) {
+    for (addr = resolved; addr != NULL; addr = addr->ai_next) {
         sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
         if (sockfd == -1) {
             perror("socket");
@@ -68,9 +68,9 @@ char **loadgopher(struct pageinfo *target) {
 
     while (!at_end) {
         lines[current_line_idx] = malloc(sizeof(char) * cline_alloc_current);
-        int current_alloc_increase = 0;
+        int current_alloc_increase = 0, cchar;
         
-        for (int cchar = 0; 1; cchar++) {
+        for (cchar = 0; 1; cchar++) {
             char readc;
             if (!read(sockfd, &readc, 1)) {
                 at_end = 1;
@@ -105,7 +105,7 @@ char **loadgopher(struct pageinfo *target) {
         }
 
         /* write line count */
-        target->linecount = current_line_idx - 2;
+        target->linecount = current_line_idx;
     }
 
     /* close socket */
@@ -132,11 +132,12 @@ struct pageinfo *parseurl(char *url) {
             break;
         }
     }
-    if (i == urllen) { /* if no scheme specified */
+    if (i == urllen - 2) { /* if no scheme specified */
         parsedurl->scheme = strdup("gopher");
         i = 0;
         parsedurl->host = url;
     }
+    i += 3;
 
     /* find hostname */
     for (; i < urllen; i++) {
@@ -150,8 +151,16 @@ struct pageinfo *parseurl(char *url) {
                     parsedurl->path = malloc(sizeof(char) * (urllen - i + 1));
                     strcpy(parsedurl->path, url + i);
                     url[i] = '\0';
+
+                    break;
                 }
             }
+
+            if (i == urllen) {
+                parsedurl->path = strdup("/");
+            }
+
+            break;
         } else if (url[i] == '/') { /* end of hostname, path begin */
             parsedurl->path = malloc(sizeof(char) * (urllen - i + 1));
             strcpy(parsedurl->path, url + i); /* preserve leading slash */
@@ -165,7 +174,21 @@ struct pageinfo *parseurl(char *url) {
             } else {
                 parsedurl->port = strdup("80");
             }
+
+            break;
         }
+    }
+    if (i == urllen) {
+        /* find default/standard port value */
+        if (!strcmp(parsedurl->scheme, "gopher")) {
+            parsedurl->port = strdup("70");
+        } else if (!strcmp(parsedurl->scheme, "https")) {
+            parsedurl->port = strdup("443");
+        } else {
+            parsedurl->port = strdup("80");
+        }
+            
+        parsedurl->path = strdup("/");
     }
 
     return parsedurl;
@@ -174,9 +197,13 @@ struct pageinfo *parseurl(char *url) {
 struct simplepage *handleloadrequest(char *url) {
     struct pageinfo *urlparts = parseurl(url);
 
-    urlparts->title = strdup("gopher");
+    /* title isn't used, saves a few bytes */
+    /* urlparts->title = strdup("gopher"); */
 
     char **lines = loadgopher(urlparts);
+    if (lines == NULL) {
+        return NULL;
+    }
 
     struct simplepage *parsedfinal = parsegopher(lines, urlparts);
 

@@ -4,8 +4,9 @@ struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
     struct typedline **lines = malloc(sizeof(struct typedline *) * metadata->linecount);
     struct simplepage *parsedpage = malloc(sizeof(struct simplepage));
     *parsedpage = (struct simplepage){ .lines = lines, .meta = metadata };
+    unsigned int i;
 
-    for (unsigned int i = 0; i < metadata->linecount; i++) {
+    for (i = 0; i < metadata->linecount; i++) {
         /* parse type */
         enum linetype ltype = error;
         switch (responsetext[i][0]) {
@@ -74,9 +75,9 @@ struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
         cline->ltype = ltype;
         cline->text = responsetext[i] + 1; /* pop first char */
 
-        unsigned int linelen = strlen(responsetext[i]);
+        unsigned int linelen = strlen(responsetext[i]), pos;
         int currentval = 0;
-        for (unsigned int pos = 1; pos < linelen; pos++) {
+        for (pos = 1; pos < linelen; pos++) {
             if (responsetext[i][pos] == '\t') {
                 responsetext[i][pos] = '\0';
                 if (currentval == 0) {
