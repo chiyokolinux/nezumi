@@ -111,7 +111,7 @@ struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata) {
         struct typedline *cline = malloc(sizeof(struct typedline));
 
         cline->ltype = ltype;
-        cline->text = responsetext[i] + 1; /* pop first char */
+        cline->text = responsetext[i];
 
         char *empty = malloc(sizeof(char));
         *empty = '\0';

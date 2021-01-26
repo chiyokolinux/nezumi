@@ -253,5 +253,8 @@ struct simplepage *followplain(struct simplepage *current, unsigned int linum) {
 
     struct simplepage *parsedfinal = parseplain(lines, meta);
 
+    /* fix for final dot being rendered */
+    parsedfinal->meta->linecount--;
+    
     return parsedfinal;
 }
