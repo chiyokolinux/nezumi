@@ -3,7 +3,8 @@
 
 #include <curses.h>
 
-#define MAXURLLEN 512
+#define MAXURLLEN   512
+#define HISTSIZE    32
 
 #include "networking.h"
 #include "parser.h"
@@ -14,8 +15,12 @@ void load_page(char *url);
 void mainloop();
 void prompt_url();
 void scroll_current(unsigned int factor);
+void hist_prev();
+void hist_next();
 
 struct simplepage *currentsite = NULL;
+struct simplepage **history = NULL;
+int histidx = -1, histmax = 0;
 
 int main(void) {
     /* init curses */
@@ -28,6 +33,9 @@ int main(void) {
     start_color();
     init_colors();
 
+    /* malloc history */
+    history = malloc(sizeof(struct simplepage *) * HISTSIZE);
+    
     set_header_text("welcome to nezumi!");
 
     load_page(strdup("gopher://gopher.floodgap.com/"));
@@ -120,6 +128,8 @@ void mainloop() {
             case 'f':
                 if (currentsite->lines[y - 1 + scrollf]->ltype == file) {
                     currentsite = followplain(currentsite, y - 1 + scrollf);
+                    history[++histidx] = currentsite;
+                    histmax = histidx;
                     scrollf = 0;
                     x = 5;
                     y = 1;
@@ -127,17 +137,59 @@ void mainloop() {
                 } else if (currentsite->lines[y - 1 + scrollf]->ltype == directory ||
                            currentsite->lines[y - 1 + scrollf]->ltype == duplicate) {
                     currentsite = followlink(currentsite, y - 1 + scrollf);
+                    history[++histidx] = currentsite;
+                    histmax = histidx;
                     scrollf = 0;
                     x = 5;
                     y = 1;
                     scroll_current(0);
                 }
                 break;
+            case 'b':
+            case 'p':
+                hist_prev();
+                scrollf = 0;
+                x = 5;
+                y = 1;
+                break;
+            case 'n':
+            case 'F':
+                hist_next();
+                scrollf = 0;
+                x = 5;
+                y = 1;
+                break;
         }
 
         move(y, x);
         refresh();
     }
+}
+
+/* hist_prev loads the previous page, if any, from cache */
+void hist_prev() {
+    if (histidx == 0) { /* safety check */
+        return;
+    }
+
+    /* load page */
+    currentsite = history[--histidx];
+
+    /* display page */
+    scroll_current(0);
+}
+
+/* hist_next loads the next page, if any, from cache */
+void hist_next() {
+    if (histidx == histmax) { /* safety check */
+        return;
+    }
+
+    /* load page */
+    currentsite = history[++histidx];
+
+    /* display page */
+    scroll_current(0);
 }
 
 /* prompts for an url entry and then loads it using load_page() */
@@ -207,8 +259,9 @@ void load_page(char *url) {
         return;
     }
 
-    /* TODO: free() currentsite with everything */
+    history[++histidx] = gsite;
     currentsite = gsite;
+    histmax = histidx;
 
     clear();
 
