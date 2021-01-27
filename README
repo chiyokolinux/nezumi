@@ -5,4 +5,7 @@ nezumi is a simple gopher browser, written in C.
 I wrote it in about 3 hours in Go but then realized that Go's tui frameworks are kinda bad (or at least I didn't wanna spend time learning them)
 so I rewrote it in C in about 3 more hours.
 
+uses environment vars to determine programs!
+$BROWSER to determine browser
+
 see TODO for what's to come

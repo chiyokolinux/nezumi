@@ -65,7 +65,12 @@ struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
                 ltype = soundfile;
                 break;
             default:
-                fprintf(stderr, "error: page %s ( at %s ) contains unknown line type %c!\n", metadata->path, metadata->url, responsetext[i][0]);
+                mvaddstr(LINES - 1, 0, "error: page ");
+                addstr(metadata->path);
+                addstr(" ( at ");
+                addstr(metadata->url);
+                addstr(" ) contains unknown line type!");
+                refresh();
                 ltype = error;
                 break;
         }

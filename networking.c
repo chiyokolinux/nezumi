@@ -26,7 +26,9 @@ char **loadgopher(struct pageinfo *target) {
     /* resolve host */
     err = getaddrinfo(target->host, target->port, &opts, &resolved);
     if (err != 0) {
-        fprintf(stderr, "error: getaddrinfo: %s", gai_strerror(err));
+        mvaddstr(LINES - 1, 0, "error: getaddrinfo: ");
+        addstr(gai_strerror(err));
+        refresh();
         return NULL;
     }
     
@@ -34,14 +36,18 @@ char **loadgopher(struct pageinfo *target) {
     for (addr = resolved; addr != NULL; addr = addr->ai_next) {
         sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
         if (sockfd == -1) {
-            perror("socket");
+            mvaddstr(LINES - 1, 0, "socket: ");
+            addstr(strerror(errno));
+            refresh();
             continue;
         }
 
         if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) == 0) {
             break;
         } else {
-            perror("connect");
+            mvaddstr(LINES - 1, 0, "connect: ");
+            addstr(strerror(errno));
+            refresh();
         }
 
         close(sockfd);
@@ -58,7 +64,9 @@ char **loadgopher(struct pageinfo *target) {
     /* write magic number */
     count = write(sockfd, magicstring, strlen(magicstring));
     if (count < 0) {
-        perror("write");
+        mvaddstr(LINES - 1, 0, "write: ");
+        addstr(strerror(errno));
+        refresh();
         return NULL;
     }
 
@@ -87,7 +95,16 @@ char **loadgopher(struct pageinfo *target) {
             if (readc == '\r' || readc == '\n') {
                 lines[current_line_idx][cchar] = '\0';
                 current_line_idx++;
-                read(sockfd, &readc, 1);
+
+                /* for files that send only \n */
+                if (readc != '\n') {
+                    read(sockfd, &readc, 1);
+                    if (readc != '\n') {
+                        /* if we'd have ignored a char, seek back by one */
+                        lseek(sockfd, -1, SEEK_CUR);
+                    }
+                }
+
                 break;
             }
 

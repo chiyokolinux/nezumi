@@ -95,18 +95,24 @@ void mainloop() {
                 } else if (scrollf > 0) {
                     scroll_current(--scrollf);
                 }
+                move(LINES - 1, 0);
+                clrtoeol();
                 break;
             case KEY_DOWN:
-                if (y < LINES - 1) {
+                if (y < LINES - 2) {
                     y++;
                 } else if ((unsigned)scrollf + (unsigned)LINES <= currentsite->meta->linecount) {
                     scroll_current(++scrollf);
                 }
+                move(LINES - 1, 0);
+                clrtoeol();
                 break;
             case KEY_LEFT:
                 if (x > 5) {
                     x--;
                 }
+                move(LINES - 1, 0);
+                clrtoeol();
                 break;
             case KEY_RIGHT:
                 if (x < COLS) {
@@ -115,6 +121,8 @@ void mainloop() {
                     x = 5;
                     y++;
                 }
+                move(LINES - 1, 0);
+                clrtoeol();
                 break;
             /* site navigation */
             case 'o':
@@ -151,6 +159,8 @@ void mainloop() {
                 scrollf = 0;
                 x = 5;
                 y = 1;
+                move(LINES - 1, 0);
+                clrtoeol();
                 break;
             case 'n':
             case 'F':
@@ -158,6 +168,8 @@ void mainloop() {
                 scrollf = 0;
                 x = 5;
                 y = 1;
+                move(LINES - 1, 0);
+                clrtoeol();
                 break;
         }
 
@@ -231,7 +243,7 @@ void scroll_current(unsigned int factor) {
 
     set_header_text(currentsite->meta->url);
     
-    for (i = 0; factor < currentsite->meta->linecount && i < (unsigned)LINES; i++, factor++) {
+    for (i = 0; factor < currentsite->meta->linecount && i < (unsigned)LINES - 2; i++, factor++) {
         attron(COLOR_PAIR(2));
         sprintf(linum, "%4u", factor + 1);
         mvaddstr(i + 1, 0, linum);
@@ -251,6 +263,13 @@ void scroll_current(unsigned int factor) {
 
 /* loads a page into the main area */
 void load_page(char *url) {
+    char *message = malloc(sizeof(char) * (strlen(url) + 12));
+    strcpy(message, "loading ");
+    strcat(message, url);
+    strcat(message, "...");
+    mvaddstr(LINES - 1, 0, message);
+    refresh();
+    
     struct simplepage *gsite = handleloadrequest(url);
     char linum[12];
     unsigned int i;
@@ -267,7 +286,7 @@ void load_page(char *url) {
 
     set_header_text(gsite->meta->url);
 
-    for (i = 0; i < (unsigned)LINES && i < gsite->meta->linecount; i++) {
+    for (i = 0; i < (unsigned)LINES - 2 && i < gsite->meta->linecount; i++) {
         attron(COLOR_PAIR(2));
         sprintf(linum, "%4u", i + 1);
         mvaddstr(i + 1, 0, linum);
@@ -284,7 +303,13 @@ void load_page(char *url) {
         attroff(COLOR_PAIR(3));
     }
 
+    strcpy(message, "loaded ");
+    strcat(message, gsite->meta->url);
+    mvaddstr(LINES - 1, 0, message);
+    
     move(1, 5);
     
     refresh();
+
+    free(message);
 }
