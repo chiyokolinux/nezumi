@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 
 #include <curses.h>
 
@@ -32,6 +33,9 @@ int main(void) {
     wclear(stdscr);
     start_color();
     init_colors();
+
+    /* instantly reap children, do not reap them in some fancy handler */
+    signal(SIGCHLD, SIG_IGN);
 
     /* malloc history */
     history = malloc(sizeof(struct simplepage *) * HISTSIZE);
@@ -82,7 +86,7 @@ void set_header_text(char text[]) {
 /* handles key events */
 void mainloop() {
     int keyevent = -1;
-    int y = 1, x = 5, scrollf = 0;
+    int y = 1, x = 5, scrollf = 0, reset_pos;
 
     while (keyevent != 'q' && keyevent != KEY_CANCEL) {
         keyevent = getch();
@@ -134,17 +138,30 @@ void mainloop() {
             case ' ':
             case KEY_ENTER:
             case 'f':
-                if (currentsite->lines[y - 1 + scrollf]->ltype == file) {
-                    currentsite = followplain(currentsite, y - 1 + scrollf);
-                    history[++histidx] = currentsite;
-                    histmax = histidx;
-                    scrollf = 0;
-                    x = 5;
-                    y = 1;
-                    scroll_current(0);
-                } else if (currentsite->lines[y - 1 + scrollf]->ltype == directory ||
-                           currentsite->lines[y - 1 + scrollf]->ltype == duplicate) {
-                    currentsite = followlink(currentsite, y - 1 + scrollf);
+                reset_pos = 1;
+                switch (currentsite->lines[y - 1 + scrollf]->ltype) {
+                    case file:
+                        currentsite = followplain(currentsite, y - 1 + scrollf);
+                        break;
+                    case directory:
+                    case duplicate:
+                        currentsite = followlink(currentsite, y - 1 + scrollf);
+                        break;
+                    case hyperlink:
+                        /* telnet, cso and tn3270-telnet are their own protocols,
+                           so they are opened in a browser/with xdg-open. */
+                    case csoserver:
+                    case telnetsession:
+                    case tn3270session:
+                        followhyper(currentsite, y - 1 + scrollf);
+                        reset_pos = 0;
+                        break;
+                    default:
+                        reset_pos = 0;
+                }
+
+                /* if link could be followed by nezumi itself, reset pos & add to history */
+                if (reset_pos) {
                     history[++histidx] = currentsite;
                     histmax = histidx;
                     scrollf = 0;

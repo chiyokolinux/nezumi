@@ -275,3 +275,36 @@ struct simplepage *followplain(struct simplepage *current, unsigned int linum) {
     
     return parsedfinal;
 }
+
+struct simplepage *followhyper(struct simplepage *current, unsigned int linum) {
+    /* find browser from env, otherwise use xdg-open */
+    char *browser = getenv("BROWSER"), *url;
+    if (!browser) {
+        browser = strdup("xdg-open");
+    }
+    
+    switch (fork()) {
+        case 0:
+            url = current->lines[linum]->magicString;
+            if (url[0] == '/') {
+                url++; /* skip leading slash */
+            }
+            if (!strncmp(url, "URL:", 4)) {
+                url += 4;
+            }
+
+            char *const runcmd[] = { browser, url, NULL };
+
+            execvp(runcmd[0], runcmd);
+
+            perror("execvp");
+            _exit(1);
+        case -1:
+            mvaddstr(LINES - 1, 0, "fork: ");
+            addstr(strerror(errno));
+            refresh();
+            return NULL;
+        default:
+            return NULL;
+    }
+}
