@@ -4,9 +4,7 @@
 
 #include <curses.h>
 
-#define MAXURLLEN   512
-#define HISTSIZE    32
-
+#include "config.h"
 #include "networking.h"
 #include "parser.h"
 
@@ -24,7 +22,7 @@ struct simplepage *currentsite = NULL;
 struct simplepage **history = NULL;
 int histidx = -1, histmax = 0;
 
-int main(void) {
+int main(int argc, char **argv) {
     /* init curses */
     initscr();
     noecho();
@@ -43,7 +41,11 @@ int main(void) {
     
     set_header_text("welcome to nezumi!");
 
-    load_page(strdup("gopher://gopher.floodgap.com/"));
+    if (argc > 1) {
+        load_page(strdup(argv[1]));
+    } else {
+        load_page(strdup("gopher://gopher.floodgap.com/"));
+    }
 
     mainloop();
     
