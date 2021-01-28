@@ -7,7 +7,7 @@ NETWOBJ = networking.o
 PARSOBJ = parser.o
 
 OBJECTS = $(NETWOBJ) $(PARSOBJ) $(PROGOBJ)
-HEADERS = networking.h parser.h
+HEADERS = config.h networking.h parser.h
 
 all: $(PROGBIN)
 
@@ -22,8 +22,8 @@ $(PROGOBJ): $(HEADERS)
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f $(PROGBIN) $(DESTDIR)$(PREFIX)/bin
-#	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-#	sed "s/1.0/$(VERSION)/g" < $(NAME).1 > $(DESTDIR)$(MANPREFIX)/man1/$(NAME).1
+	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
+	sed "s/1.0/$(VERSION)/g" < $(NAME).1 > $(DESTDIR)$(MANPREFIX)/man1/$(NAME).1
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(PROGBIN)
@@ -31,7 +31,7 @@ uninstall:
 
 dist: clean
 	mkdir -p $(NAME)-$(VERSION)
-	cp -f Makefile README config.mk *.c *.h $(NAME)-$(VERSION)
+	cp -f Makefile README config.mk *.c *.h nezumi.1 $(NAME)-$(VERSION)
 	tar -cf $(NAME)-$(VERSION).tar $(NAME)-$(VERSION)
 	gzip $(NAME)-$(VERSION).tar
 	rm -rf $(NAME)-$(VERSION)
