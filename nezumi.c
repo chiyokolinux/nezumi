@@ -14,6 +14,7 @@ void load_page(char *url);
 void mainloop();
 void prompt_url();
 void prompt_index(unsigned int linum);
+void prompt_download(unsigned int linum);
 void scroll_current(unsigned int factor);
 void hist_prev();
 void hist_next();
@@ -170,7 +171,8 @@ void mainloop() {
                     case image:
                     case document:
                     case soundfile:
-                        /* TODO: promt save as & download until EOS */
+                        prompt_download(y - 1 + scrollf);
+                        reset_pos = 0;
                         break;
                     default:
                         reset_pos = 0;
@@ -298,6 +300,37 @@ void prompt_index(unsigned int linum) {
         currentsite = followprompt(currentsite, linum, squery);
     } else {
         free(squery);
+    }
+    attroff(A_REVERSE);
+    noecho();
+}
+
+/* prompts for a file name in the current directory and
+   downloads the currently selected binary file */
+void prompt_download(unsigned int linum) {
+    char *prompt = malloc(sizeof(char) * COLS);
+    int i = 8;
+
+    /* fill spaces */
+    strcpy(prompt, "save as:");
+    for (; i < COLS; i++)
+        prompt[i] = ' ';
+    prompt[i] = '\0';
+
+    attron(A_REVERSE);
+    mvwaddstr(stdscr, LINES - 2, 0, prompt);
+    move(LINES - 2, 9);
+    
+    free(prompt);
+    
+    refresh();
+
+    char *fname = malloc(sizeof(char) * MAXURLLEN);
+    echo();
+    if (getnstr(fname, MAXURLLEN - 2) != ERR) {
+        followbinary(currentsite, linum, fname);
+    } else {
+        free(fname);
     }
     attroff(A_REVERSE);
     noecho();

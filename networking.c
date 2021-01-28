@@ -474,6 +474,10 @@ struct simplepage *followbinary(struct simplepage *current, unsigned int linum, 
 
             loadbinary(meta, dest);
 
+            mvaddstr(LINES - 1, 0, "downloaded ");
+            addstr(dest);
+            refresh();
+
             _exit(0);
         case -1:
             mvaddstr(LINES - 1, 0, "fork: ");
