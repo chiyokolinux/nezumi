@@ -131,6 +131,121 @@ char **loadgopher(struct pageinfo *target) {
     return lines;
 }
 
+void loadbinary(struct pageinfo *target, char *destpath) {
+    /* open output file */
+    int outfd = open(destpath, O_CREAT | O_WRONLY | O_TRUNC);
+    if (outfd == -1) {
+        mvaddstr(LINES - 1, 0, "open: ");
+        addstr(strerror(errno));
+        refresh();
+        return;
+    }
+
+    /* declare request variables */
+    char *magicstring = malloc(sizeof(char) * (strlen(target->path) + 3));
+
+    /* build magic string (incl. \r\n) */
+    strcpy(magicstring, target->path);
+    strcat(magicstring, "\r\n");
+
+    /* build socket vars & opts */
+    int sockfd = -1, err, count;
+    struct addrinfo opts = {}, *resolved, *addr;
+    opts.ai_family = AF_UNSPEC; /* we want both IPv4 and IPv6 */
+    opts.ai_socktype = SOCK_STREAM;
+    opts.ai_protocol = IPPROTO_TCP;
+
+    /* resolve host */
+    err = getaddrinfo(target->host, target->port, &opts, &resolved);
+    if (err != 0) {
+        mvaddstr(LINES - 1, 0, "error: getaddrinfo: ");
+        addstr(gai_strerror(err));
+        refresh();
+        return;
+    }
+    
+    /* create socket */
+    for (addr = resolved; addr != NULL; addr = addr->ai_next) {
+        sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        if (sockfd == -1) {
+            mvaddstr(LINES - 1, 0, "socket: ");
+            addstr(strerror(errno));
+            refresh();
+            continue;
+        }
+
+        if (connect(sockfd, addr->ai_addr, addr->ai_addrlen) == 0) {
+            break;
+        } else {
+            mvaddstr(LINES - 1, 0, "connect: ");
+            addstr(strerror(errno));
+            refresh();
+        }
+
+        close(sockfd);
+    }
+
+    /* free resolved stuff */
+    freeaddrinfo(resolved);
+
+    /* if no connecttion could be established, return NULL */
+    if (sockfd == -1) {
+        return;
+    }
+
+    /* write magic number */
+    count = write(sockfd, magicstring, strlen(magicstring));
+    if (count < 0) {
+        mvaddstr(LINES - 1, 0, "write: ");
+        addstr(strerror(errno));
+        refresh();
+        return;
+    }
+
+    /* prepare reading vars */
+    int bufsize = 1024, at_end = 0, errc = 0;
+    char *buf = malloc(sizeof(char) * bufsize);
+
+    while (!at_end && errc < 3) {
+        ssize_t len = read(sockfd, buf, bufsize);
+        if (len == 0) {
+            at_end = 1;
+        } else if (len == -1) {
+            mvaddstr(LINES - 1, 0, "read: ");
+            addstr(strerror(errno));
+            refresh();
+            errc++; /* only continue if <3 errors occured */
+            continue;
+        }
+
+        ssize_t wrlen = write(outfd, buf, len);
+        if (wrlen == -1) {
+            mvaddstr(LINES - 1, 0, "write: ");
+            addstr(strerror(errno));
+            refresh();
+            errc++; /* only continue if <3 errors occured */
+            continue;
+        }
+
+        /* something interrupted our writing.
+           if this happened, just try to write the rest */
+        if (len != wrlen) {
+            wrlen = write(outfd, buf + wrlen, len - wrlen);
+            if (wrlen == -1) {
+                mvaddstr(LINES - 1, 0, "write: ");
+                addstr(strerror(errno));
+                refresh();
+                errc++; /* only continue if <3 errors occured */
+                continue;
+            }
+        }
+    }
+
+    /* close socket and output file */
+    close(sockfd);
+    close(outfd);
+}
+
 struct pageinfo *parseurl(char *url) {
     int urllen = strlen(url), i = 1;
 
@@ -327,6 +442,39 @@ struct simplepage *followhyper(struct simplepage *current, unsigned int linum) {
 
             perror("execvp");
             _exit(1);
+        case -1:
+            mvaddstr(LINES - 1, 0, "fork: ");
+            addstr(strerror(errno));
+            refresh();
+            return NULL;
+        default:
+            return NULL;
+    }
+}
+
+struct simplepage *followbinary(struct simplepage *current, unsigned int linum, char *dest) {
+    switch (fork()) {
+        case 0:
+            mvaddstr(LINES - 1, 0, "downloading ");
+            addstr(dest);
+            addstr("...");
+            refresh();
+
+            struct pageinfo *meta = malloc(sizeof(struct pageinfo));
+
+            *meta = (struct pageinfo) {
+                .scheme = current->meta->scheme,
+                .host = current->lines[linum]->host,
+                .port = current->lines[linum]->port,
+                .path = current->lines[linum]->magicString,
+                .url = current->lines[linum]->host,
+                .title = NULL, /* title isn't used */
+                .linecount = 0
+            };
+
+            loadbinary(meta, dest);
+
+            _exit(0);
         case -1:
             mvaddstr(LINES - 1, 0, "fork: ");
             addstr(strerror(errno));

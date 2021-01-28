@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -22,5 +23,6 @@ struct simplepage *followlink(struct simplepage *current, unsigned int linum);
 struct simplepage *followprompt(struct simplepage *current, unsigned int linum, char *query);
 struct simplepage *followplain(struct simplepage *current, unsigned int linum);
 struct simplepage *followhyper(struct simplepage *current, unsigned int linum);
+struct simplepage *followbinary(struct simplepage *current, unsigned int linum, char *dest);
 
 #endif /* NETWORKING_H */

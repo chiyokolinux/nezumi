@@ -160,8 +160,19 @@ void mainloop() {
                     case indexserver:
                         prompt_index(y - 1 + scrollf);
                         break;
+                    case binhex:
+                    case dosbinary:
+                    case uuencoded:
+                    case binaryfile:
+                    case gifimage:
+                    case image:
+                    case document:
+                    case soundfile:
+                        /* TODO: promt save as & download until EOS */
+                        break;
                     default:
                         reset_pos = 0;
+                        break;
                 }
 
                 /* if link could be followed by nezumi itself, reset pos & add to history */
