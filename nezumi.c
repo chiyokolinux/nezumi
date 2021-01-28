@@ -15,6 +15,7 @@ void set_header_text(char text[]);
 void load_page(char *url);
 void mainloop();
 void prompt_url();
+void prompt_index(unsigned int linum);
 void scroll_current(unsigned int factor);
 void hist_prev();
 void hist_next();
@@ -156,18 +157,25 @@ void mainloop() {
                         followhyper(currentsite, y - 1 + scrollf);
                         reset_pos = 0;
                         break;
+                    case indexserver:
+                        prompt_index(y - 1 + scrollf);
+                        break;
                     default:
                         reset_pos = 0;
                 }
 
                 /* if link could be followed by nezumi itself, reset pos & add to history */
                 if (reset_pos) {
-                    history[++histidx] = currentsite;
-                    histmax = histidx;
-                    scrollf = 0;
-                    x = 5;
-                    y = 1;
-                    scroll_current(0);
+                    if (currentsite) {
+                        history[++histidx] = currentsite;
+                        histmax = histidx;
+                        scrollf = 0;
+                        x = 5;
+                        y = 1;
+                        scroll_current(0);
+                    } else {
+                        currentsite = history[histidx];
+                    }
                 }
                 break;
             case 'b':
@@ -246,6 +254,37 @@ void prompt_url() {
         load_page(gotourl);
     } else {
         free(gotourl);
+    }
+    attroff(A_REVERSE);
+    noecho();
+}
+
+/* prompts for an index search string and then requests
+   the results from the currently selected index server */
+void prompt_index(unsigned int linum) {
+    char *prompt = malloc(sizeof(char) * COLS);
+    int i = 13;
+
+    /* fill spaces */
+    strcpy(prompt, "search query:");
+    for (; i < COLS; i++)
+        prompt[i] = ' ';
+    prompt[i] = '\0';
+
+    attron(A_REVERSE);
+    mvwaddstr(stdscr, LINES - 2, 0, prompt);
+    move(LINES - 2, 14);
+    
+    free(prompt);
+    
+    refresh();
+
+    char *squery = malloc(sizeof(char) * MAXURLLEN);
+    echo();
+    if (getnstr(squery, MAXURLLEN - 2) != ERR) {
+        currentsite = followprompt(currentsite, linum, squery);
+    } else {
+        free(squery);
     }
     attroff(A_REVERSE);
     noecho();

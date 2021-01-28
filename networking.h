@@ -19,6 +19,7 @@ char **loadgopher(struct pageinfo *target);
 struct pageinfo *parseurl(char *url);
 struct simplepage *handleloadrequest(char *url);
 struct simplepage *followlink(struct simplepage *current, unsigned int linum);
+struct simplepage *followprompt(struct simplepage *current, unsigned int linum, char *query);
 struct simplepage *followplain(struct simplepage *current, unsigned int linum);
 struct simplepage *followhyper(struct simplepage *current, unsigned int linum);
 
