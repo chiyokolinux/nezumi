@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
     /* malloc history */
     history = malloc(sizeof(struct simplepage *) * HISTSIZE);
-    
+
     set_header_text("welcome to nezumi!");
 
     if (argc > 1) {
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     }
 
     mainloop();
-    
+
     /* end curses */
     nocbreak();
     keypad(stdscr, false);
@@ -258,9 +258,9 @@ void prompt_url() {
     attron(A_REVERSE);
     mvwaddstr(stdscr, LINES - 2, 0, prompt);
     move(LINES - 2, 10);
-    
+
     free(prompt);
-    
+
     refresh();
 
     char *gotourl = malloc(sizeof(char) * MAXURLLEN);
@@ -289,9 +289,9 @@ void prompt_index(unsigned int linum) {
     attron(A_REVERSE);
     mvwaddstr(stdscr, LINES - 2, 0, prompt);
     move(LINES - 2, 14);
-    
+
     free(prompt);
-    
+
     refresh();
 
     char *squery = malloc(sizeof(char) * MAXURLLEN);
@@ -320,9 +320,9 @@ void prompt_download(unsigned int linum) {
     attron(A_REVERSE);
     mvwaddstr(stdscr, LINES - 2, 0, prompt);
     move(LINES - 2, 9);
-    
+
     free(prompt);
-    
+
     refresh();
 
     char *fname = malloc(sizeof(char) * MAXURLLEN);
@@ -344,7 +344,7 @@ void scroll_current(unsigned int factor) {
     clear();
 
     set_header_text(currentsite->meta->url);
-    
+
     for (i = 0; factor < currentsite->meta->linecount && i < (unsigned)LINES - 2; i++, factor++) {
         attron(COLOR_PAIR(2));
         sprintf(linum, "%4u", factor + 1);
@@ -371,7 +371,7 @@ void load_page(char *url) {
     strcat(message, "...");
     mvaddstr(LINES - 1, 0, message);
     refresh();
-    
+
     struct simplepage *gsite = handleloadrequest(url);
     char linum[12];
     unsigned int i;
@@ -408,9 +408,9 @@ void load_page(char *url) {
     strcpy(message, "loaded ");
     strcat(message, gsite->meta->url);
     mvaddstr(LINES - 1, 0, message);
-    
+
     move(1, 5);
-    
+
     refresh();
 
     free(message);
