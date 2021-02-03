@@ -255,6 +255,9 @@ void prompt_url() {
         prompt[i] = ' ';
     prompt[i] = '\0';
 
+    move(LINES - 1, 0);
+    clrtoeol();
+
     attron(A_REVERSE);
     mvwaddstr(stdscr, LINES - 2, 0, prompt);
     move(LINES - 2, 10);
@@ -287,6 +290,9 @@ void prompt_index(unsigned int linum) {
         prompt[i] = ' ';
     prompt[i] = '\0';
 
+    move(LINES - 1, 0);
+    clrtoeol();
+
     attron(A_REVERSE);
     mvwaddstr(stdscr, LINES - 2, 0, prompt);
     move(LINES - 2, 14);
@@ -318,6 +324,9 @@ void prompt_download(unsigned int linum) {
     for (; i < COLS; i++)
         prompt[i] = ' ';
     prompt[i] = '\0';
+
+    move(LINES - 1, 0);
+    clrtoeol();
 
     attron(A_REVERSE);
     mvwaddstr(stdscr, LINES - 2, 0, prompt);
