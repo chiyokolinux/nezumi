@@ -266,11 +266,12 @@ void prompt_url() {
     char *gotourl = malloc(sizeof(char) * MAXURLLEN);
     echo();
     if (getnstr(gotourl, MAXURLLEN - 2) != ERR) {
+        attroff(A_REVERSE);
         load_page(gotourl);
     } else {
+        attroff(A_REVERSE);
         free(gotourl);
     }
-    attroff(A_REVERSE);
     noecho();
 }
 
@@ -297,11 +298,12 @@ void prompt_index(unsigned int linum) {
     char *squery = malloc(sizeof(char) * MAXURLLEN);
     echo();
     if (getnstr(squery, MAXURLLEN - 2) != ERR) {
+        attroff(A_REVERSE);
         currentsite = followprompt(currentsite, linum, squery);
     } else {
+        attroff(A_REVERSE);
         free(squery);
     }
-    attroff(A_REVERSE);
     noecho();
 }
 
@@ -328,6 +330,7 @@ void prompt_download(unsigned int linum) {
     char *fname = malloc(sizeof(char) * MAXURLLEN);
     echo();
     if (getnstr(fname, MAXURLLEN - 2) != ERR) {
+        attroff(A_REVERSE);
         followbinary(currentsite, linum, fname);
     } else {
         free(fname);
