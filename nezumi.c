@@ -90,11 +90,12 @@ void set_header_text(char text[]) {
 /* handles key events */
 void mainloop() {
     int keyevent = -1;
-    int y = 1, x = 5, scrollf = 0, reset_pos;
+    int y = 1, x = 5, scrollf = 0, reset_pos, move_cursor;
 
     while (keyevent != 'q' && keyevent != KEY_CANCEL) {
         keyevent = getch();
 
+        move_cursor = 1;
         switch (keyevent) {
             /* cursor movement */
             case KEY_UP:
@@ -173,6 +174,7 @@ void mainloop() {
                     case soundfile:
                         prompt_download(y - 1 + scrollf);
                         reset_pos = 0;
+                        move_cursor = 0;
                         break;
                     default:
                         reset_pos = 0;
@@ -213,7 +215,9 @@ void mainloop() {
                 break;
         }
 
-        move(y, x);
+        if (move_cursor) {
+            move(y, x);
+        }
         refresh();
     }
 }

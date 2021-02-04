@@ -31,7 +31,7 @@ char **loadgopher(struct pageinfo *target) {
         refresh();
         return NULL;
     }
-    
+
     /* create socket */
     for (addr = resolved; addr != NULL; addr = addr->ai_next) {
         sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
@@ -77,7 +77,7 @@ char **loadgopher(struct pageinfo *target) {
     while (!at_end) {
         lines[current_line_idx] = malloc(sizeof(char) * cline_alloc_current);
         int current_alloc_increase = 0, cchar;
-        
+
         for (cchar = 0; 1; cchar++) {
             char readc;
             if (!read(sockfd, &readc, 1)) {
@@ -163,7 +163,7 @@ void loadbinary(struct pageinfo *target, char *destpath) {
         refresh();
         return;
     }
-    
+
     /* create socket */
     for (addr = resolved; addr != NULL; addr = addr->ai_next) {
         sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
@@ -319,7 +319,7 @@ struct pageinfo *parseurl(char *url) {
         } else {
             parsedurl->port = strdup("80");
         }
-            
+
         parsedurl->path = strdup("/");
     }
 
@@ -372,7 +372,7 @@ struct simplepage *followprompt(struct simplepage *current, unsigned int linum, 
     strcpy(pathquery, current->lines[linum]->magicString);
     strcat(pathquery, "\t");
     strcat(pathquery, query);
-    
+
     *meta = (struct pageinfo) {
         .scheme = current->meta->scheme, /* followlink() stays on gopher protocol */
         .host = current->lines[linum]->host,
@@ -415,7 +415,7 @@ struct simplepage *followplain(struct simplepage *current, unsigned int linum) {
 
     /* fix for final dot being rendered */
     parsedfinal->meta->linecount--;
-    
+
     return parsedfinal;
 }
 
@@ -425,7 +425,7 @@ struct simplepage *followhyper(struct simplepage *current, unsigned int linum) {
     if (!browser) {
         browser = strdup("xdg-open");
     }
-    
+
     switch (fork()) {
         case 0:
             url = current->lines[linum]->magicString;
