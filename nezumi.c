@@ -215,6 +215,10 @@ void mainloop() {
                 move(LINES - 1, 0);
                 clrtoeol();
                 break;
+            case 'r':
+                load_page(currentsite->meta->url);
+                scroll_current(scrollf);
+                break;
         }
 
         if (move_cursor) {
