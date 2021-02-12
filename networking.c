@@ -1,3 +1,5 @@
+/* See LICENSE file for license and copyright information. */
+
 #include "networking.h"
 
 char **loadgopher(struct pageinfo *target) {

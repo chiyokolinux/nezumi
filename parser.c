@@ -1,3 +1,5 @@
+/* See LICENSE file for license and copyright information. */
+
 #include "parser.h"
 
 struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
