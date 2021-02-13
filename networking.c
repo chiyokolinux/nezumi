@@ -292,6 +292,7 @@ struct pageinfo *parseurl(char *url) {
 
             if (i == urllen) {
                 parsedurl->path = strdup("/");
+                i--; /* fix for bug which would override port when empty path */
             }
 
             break;
