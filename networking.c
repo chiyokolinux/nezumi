@@ -348,7 +348,7 @@ struct simplepage *handleloadrequest(char *url) {
 struct simplepage *followlink(struct simplepage *current, unsigned int linum) {
     struct pageinfo *meta = malloc(sizeof(struct pageinfo));
     char *fancyurl = malloc(sizeof(char) * (strlen(current->lines[linum]->host) + strlen(current->lines[linum]->port) + strlen(current->lines[linum]->magicString) + strlen(current->meta->scheme) + 7));
-    sprintf(fancyurl, "%s://%s:%s/%s", current->meta->scheme, current->lines[linum]->host, current->lines[linum]->port, current->lines[linum]->magicString);
+    sprintf(fancyurl, "%s://%s:%s%s", current->meta->scheme, current->lines[linum]->host, current->lines[linum]->port, current->lines[linum]->magicString);
 
     *meta = (struct pageinfo) {
         .scheme = current->meta->scheme, /* followlink() stays on gopher protocol */
@@ -379,7 +379,7 @@ struct simplepage *followprompt(struct simplepage *current, unsigned int linum, 
     strcat(pathquery, query);
 
     char *fancyurl = malloc(sizeof(char) * (strlen(current->lines[linum]->host) + strlen(current->lines[linum]->port) + strlen(current->lines[linum]->magicString) + strlen(current->meta->scheme) + 7));
-    sprintf(fancyurl, "%s://%s:%s/%s", current->meta->scheme, current->lines[linum]->host, current->lines[linum]->port, current->lines[linum]->magicString);
+    sprintf(fancyurl, "%s://%s:%s%s", current->meta->scheme, current->lines[linum]->host, current->lines[linum]->port, current->lines[linum]->magicString);
 
     *meta = (struct pageinfo) {
         .scheme = current->meta->scheme, /* followlink() stays on gopher protocol */
@@ -404,7 +404,7 @@ struct simplepage *followprompt(struct simplepage *current, unsigned int linum, 
 struct simplepage *followplain(struct simplepage *current, unsigned int linum) {
     struct pageinfo *meta = malloc(sizeof(struct pageinfo));
     char *fancyurl = malloc(sizeof(char) * (strlen(current->lines[linum]->host) + strlen(current->lines[linum]->port) + strlen(current->lines[linum]->magicString) + strlen(current->meta->scheme) + 7));
-    sprintf(fancyurl, "%s://%s:%s/%s", current->meta->scheme, current->lines[linum]->host, current->lines[linum]->port, current->lines[linum]->magicString);
+    sprintf(fancyurl, "%s://%s:%s%s", current->meta->scheme, current->lines[linum]->host, current->lines[linum]->port, current->lines[linum]->magicString);
 
     *meta = (struct pageinfo) {
         .scheme = current->meta->scheme, /* followlink() stays on gopher protocol */
