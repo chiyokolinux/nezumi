@@ -36,9 +36,12 @@ void prompt_download(unsigned int linum);
 void scroll_current(unsigned int factor);
 void hist_prev();
 void hist_next();
+void load_bookmarks();
+void add_bookmark(struct bookmark *bm, int disable_mem_write);
 
 struct simplepage *currentsite = NULL;
 struct simplepage **history = NULL;
+struct bookmark_list *bookmarks = NULL;
 int histidx = -1, histmax = 0;
 
 int main(int argc, char **argv) {
@@ -452,4 +455,87 @@ void load_page(char *url) {
     refresh();
 
     free(message);
+}
+
+/* read bookmarks file into bookmark list */
+void load_bookmarks() {
+    FILE *bmFile;
+    char path[512];
+    strcat(strcpy(path, getenv("HOME")), "/.config/nezumi-bookmarks");
+    bmFile = fopen(path, "r");
+
+    if (!bmFile) {
+        mvaddstr(LINES - 1, 0, "bookmarks file does not exist, creating...");
+
+        /* create first entry
+           calloc because we do not want uninitialized
+           memory written to our bookmarks file        */
+        struct bookmark *first_entry = calloc(1, sizeof(struct bookmark));
+        strcpy(first_entry->name, "Floodgap Gopher");
+        strcpy(first_entry->url, "gopher://gopher.floodgap.com/");
+        add_bookmark(first_entry, true);
+
+        /* alloc bookmark list struct */
+        bookmarks = malloc(sizeof(struct bookmark_list));
+        bookmarks->length = 1;
+
+        /* alloc actual list & add first entry */
+        bookmarks->bookmarks = malloc(sizeof(struct bookmark *) * 32);
+        bookmarks->alloc_length = 32;
+        bookmarks->bookmarks[0] = first_entry;
+    } else {
+        /* alloc bookmark list struct */
+        bookmarks = malloc(sizeof(struct bookmark_list));
+        bookmarks->bookmarks = malloc(sizeof(struct bookmark *) * 32);
+        bookmarks->alloc_length = 32;
+        bookmarks->length = 0;
+
+        char buf[1282];
+
+        while (fgets(buf, 1281, bmFile) != NULL) {
+            /* alloc entry & write data */
+            struct bookmark *entry = malloc(sizeof(struct bookmark));
+            strncpy(entry->name, buf, 255);
+            strncpy(entry->url, buf + 256, 1023);
+            bookmarks->bookmarks[bookmarks->length] = entry;
+
+            bookmarks->length++;
+            if (bookmarks->length >= bookmarks->alloc_length) {
+                bookmarks->alloc_length += 32;
+                bookmarks->bookmarks = realloc(bookmarks->bookmarks, sizeof(struct bookmark *) * bookmarks->alloc_length);
+            }
+        }
+    }
+}
+
+/* add a bookmark and save it to disk */
+void add_bookmark(struct bookmark *bm, int disable_mem_write) {
+    FILE *bmFile;
+    char path[512];
+    strcat(strcpy(path, getenv("HOME")), "/.config/nezumi-bookmarks");
+    bmFile = fopen(path, "a");
+
+    if (!bmFile) {
+        mvaddstr(LINES - 1, 0, "error: fopen: ");
+        addstr(strerror(errno));
+    } else {
+        char tmp[3] = "\0\n";
+
+        fwrite(bm->name, 255, 1, bmFile);
+        fwrite(tmp, 1, 1, bmFile);
+        fwrite(bm->url, 1023, 1, bmFile);
+        fwrite(tmp, 2, 1, bmFile);
+
+        fclose(bmFile);
+    }
+
+    if (!disable_mem_write) {
+        bookmarks->bookmarks[bookmarks->length] = bm;
+
+        bookmarks->length++;
+        if (bookmarks->length >= bookmarks->alloc_length) {
+            bookmarks->alloc_length += 32;
+            bookmarks->bookmarks = realloc(bookmarks->bookmarks, sizeof(struct bookmark *) * bookmarks->alloc_length);
+        }
+    }
 }

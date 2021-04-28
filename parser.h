@@ -69,6 +69,17 @@ struct simplepage {
     struct pageinfo *meta;
 };
 
+struct bookmark_list {
+    int length;
+    int alloc_length;
+    struct bookmark **bookmarks;
+};
+
+struct bookmark {
+    char name[255];
+    char url[1023];
+};
+
 struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata);
 struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata);
 
