@@ -205,7 +205,7 @@ void mainloop() {
                 /* if link could be followed by nezumi itself, reset pos & add to history */
                 if (reset_pos) {
                     if (currentsite) {
-                        history[++histidx] = currentsite;
+                        history[++histidx % HISTSIZE] = currentsite;
                         histmax = histidx;
                         scrollf = 0;
                         x = 5;
@@ -254,7 +254,7 @@ void hist_prev() {
     }
 
     /* load page */
-    currentsite = history[--histidx];
+    currentsite = history[--histidx % HISTSIZE];
 
     /* display page */
     scroll_current(0);
@@ -267,7 +267,7 @@ void hist_next() {
     }
 
     /* load page */
-    currentsite = history[++histidx];
+    currentsite = history[++histidx % HISTSIZE];
 
     /* display page */
     scroll_current(0);
@@ -421,7 +421,7 @@ void load_page(char *url) {
         return;
     }
 
-    history[++histidx] = gsite;
+    history[++histidx % HISTSIZE] = gsite;
     currentsite = gsite;
     histmax = histidx;
 
