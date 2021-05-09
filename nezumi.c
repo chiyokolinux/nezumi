@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
     /* instantly reap children, do not reap them in some fancy handler */
     signal(SIGCHLD, SIG_IGN);
 
-    /* malloc history */
-    history = malloc(sizeof(struct simplepage *) * HISTSIZE);
+    /* calloc history */
+    history = calloc(HISTSIZE, sizeof(struct simplepage *));
 
     set_header_text("welcome to nezumi!");
 
@@ -421,6 +421,9 @@ void load_page(char *url) {
         return;
     }
 
+    if (history[++histidx % HISTSIZE]) {
+        free(history[++histidx % HISTSIZE]);
+    }
     history[++histidx % HISTSIZE] = gsite;
     currentsite = gsite;
     histmax = histidx;
