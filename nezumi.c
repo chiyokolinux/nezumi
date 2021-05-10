@@ -205,7 +205,10 @@ void mainloop() {
                 /* if link could be followed by nezumi itself, reset pos & add to history */
                 if (reset_pos) {
                     if (currentsite) {
-                        history[++histidx % HISTSIZE] = currentsite;
+                        if (history[++histidx % HISTSIZE]) {
+                            freesimplepage(history[histidx % HISTSIZE], 0);
+                        }
+                        history[histidx % HISTSIZE] = currentsite;
                         histmax = histidx;
                         scrollf = 0;
                         x = 5;
@@ -422,9 +425,9 @@ void load_page(char *url) {
     }
 
     if (history[++histidx % HISTSIZE]) {
-        free(history[++histidx % HISTSIZE]);
+        freesimplepage(history[histidx % HISTSIZE], 0);
     }
-    history[++histidx % HISTSIZE] = gsite;
+    history[histidx % HISTSIZE] = gsite;
     currentsite = gsite;
     histmax = histidx;
 

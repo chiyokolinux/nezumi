@@ -147,3 +147,21 @@ struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata) {
 
     return parsedpage;
 }
+
+void freesimplepage(struct simplepage *to_free, int free_struct_itself) {
+    /* networking.c takes metadata from lines of the
+       previous history entry, so no free-ing required */
+
+    /* free lines */
+    unsigned int i;
+    for (i = 0; i < to_free->meta->linecount; i++) {
+        free(to_free->lines[i]->text - 1);
+    }
+
+    /* free top-level struct data */
+    free(to_free->lines);
+    free(to_free->meta);
+    if (free_struct_itself) {
+        free(to_free);
+    }
+}
