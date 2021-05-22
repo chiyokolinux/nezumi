@@ -36,6 +36,7 @@ void prompt_download(unsigned int linum);
 void scroll_current(unsigned int factor);
 void hist_prev();
 void hist_next();
+void bookmark_add_prompt();
 void load_bookmarks();
 void add_bookmark(struct bookmark *bm, int disable_mem_write);
 
@@ -62,6 +63,8 @@ int main(int argc, char **argv) {
     history = calloc(HISTSIZE, sizeof(struct simplepage *));
 
     set_header_text("welcome to nezumi!");
+
+    load_bookmarks();
 
     if (argc > 1) {
         load_page(strdup(argv[1]));
@@ -240,6 +243,9 @@ void mainloop() {
             case 'r':
                 load_page(currentsite->meta->url);
                 scroll_current(scrollf);
+                break;
+            case 'd': /* most browsers today use ctrl+d for bookmarking */
+                bookmark_add_prompt();
                 break;
         }
 
@@ -463,6 +469,44 @@ void load_page(char *url) {
     free(message);
 }
 
+void bookmark_add_prompt() {
+    char *prompt = malloc(sizeof(char) * COLS);
+    int i = 14;
+
+    /* fill spaces */
+    strcpy(prompt, "bookmark name:");
+    for (; i < COLS; i++)
+        prompt[i] = ' ';
+    prompt[i] = '\0';
+
+    move(LINES - 1, 0);
+    clrtoeol();
+
+    attron(A_REVERSE);
+    mvwaddstr(stdscr, LINES - 2, 0, prompt);
+    move(LINES - 2, 15);
+
+    free(prompt);
+
+    refresh();
+
+    char *bmname = malloc(sizeof(char) * 255);
+    echo();
+    if (getnstr(bmname, 254) != ERR) {
+        attroff(A_REVERSE);
+        struct bookmark *bm = malloc(sizeof(struct bookmark));
+        strncpy(bm->name, bmname, 255);
+        strncpy(bm->url, currentsite->meta->url, 1022);
+        bm->url[1022] = '\0'; /* ensure null termination */
+        add_bookmark(bm, 0);
+    }
+    free(bmname);
+    attroff(A_REVERSE);
+    move(LINES - 2, 0);
+    clrtoeol();
+    noecho();
+}
+
 /* read bookmarks file into bookmark list */
 void load_bookmarks() {
     FILE *bmFile;
@@ -479,7 +523,7 @@ void load_bookmarks() {
         struct bookmark *first_entry = calloc(1, sizeof(struct bookmark));
         strcpy(first_entry->name, "Floodgap Gopher");
         strcpy(first_entry->url, "gopher://gopher.floodgap.com/");
-        add_bookmark(first_entry, true);
+        add_bookmark(first_entry, 1);
 
         /* alloc bookmark list struct */
         bookmarks = malloc(sizeof(struct bookmark_list));
