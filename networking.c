@@ -502,6 +502,7 @@ struct simplepage *followbinary(struct simplepage *current, unsigned int linum, 
 
             mvaddstr(LINES - 1, 0, "downloaded ");
             addstr(dest);
+            clrtoeol();
             refresh();
 
             _exit(0);
