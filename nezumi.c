@@ -200,6 +200,8 @@ void mainloop() {
                         reset_pos = 0;
                         move_cursor = 0;
                         break;
+                    case bookmark:
+                        load_page(currentsite->lines[y - 1 + scrollf]->host);
                     default:
                         reset_pos = 0;
                         break;
