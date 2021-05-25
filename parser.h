@@ -83,6 +83,7 @@ struct bookmark {
 
 struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata);
 struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata);
+struct simplepage *genbookmarkspage(struct bookmark_list *bml);
 void freesimplepage(struct simplepage *to_free, int free_struct_itself);
 
 #endif /* PARSER_H */

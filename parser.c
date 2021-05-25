@@ -148,6 +148,42 @@ struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata) {
     return parsedpage;
 }
 
+struct simplepage *genbookmarkspage(struct bookmark_list *bml) {
+    struct typedline **lines = malloc(sizeof(struct typedline *) * bml->length);
+    struct simplepage *parsedpage = malloc(sizeof(struct simplepage));
+    struct pageinfo *meta = malloc(sizeof(struct pageinfo));
+    *meta = (struct pageinfo) {
+        .scheme = strdup("nezumi"),
+        .host = strdup("bookmarks"),
+        .port = strdup("0"),
+        .path = strdup("/all"),
+        .url = strdup("nezumi://bookmarks:0/all"),
+        .title = NULL,
+        .linecount = bml->length
+    };
+    *parsedpage = (struct simplepage){ .lines = lines, .meta = meta };
+    unsigned int i;
+
+    for (i = 0; i < meta->linecount; i++) {
+        enum linetype ltype = bookmark;
+
+        struct typedline *cline = malloc(sizeof(struct typedline));
+
+        cline->ltype = ltype;
+        cline->text = bml->bookmarks[i]->name;
+
+        char *empty = malloc(sizeof(char));
+        *empty = '\0';
+        cline->magicString = empty;
+        cline->host = bml->bookmarks[i]->url;
+        cline->port = empty;
+
+        lines[i] = cline;
+    }
+
+    return parsedpage;
+}
+
 void freesimplepage(struct simplepage *to_free, int free_struct_itself) {
     /* networking.c takes metadata from lines of the
        previous history entry, so no free-ing required */
@@ -155,7 +191,8 @@ void freesimplepage(struct simplepage *to_free, int free_struct_itself) {
     /* free lines */
     unsigned int i;
     for (i = 0; i < to_free->meta->linecount; i++) {
-        free(to_free->lines[i]->text - 1);
+        if (to_free->lines[i]->ltype != bookmark) /* DO NOT MESS WITH OUR BOOKMARKS! */
+            free(to_free->lines[i]->text - 1);
     }
 
     /* free top-level struct data */

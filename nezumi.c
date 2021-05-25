@@ -202,6 +202,10 @@ void mainloop() {
                         break;
                     case bookmark:
                         load_page(currentsite->lines[y - 1 + scrollf]->host);
+                        x = 5;
+                        y = 1;
+                        reset_pos = 0;
+                        break;
                     default:
                         reset_pos = 0;
                         break;
@@ -248,6 +252,18 @@ void mainloop() {
                 break;
             case 'd': /* most browsers today use ctrl+d for bookmarking */
                 bookmark_add_prompt();
+                break;
+            case 'D':
+                currentsite = genbookmarkspage(bookmarks);
+                if (history[++histidx % HISTSIZE]) {
+                    freesimplepage(history[histidx % HISTSIZE], 0);
+                }
+                history[histidx % HISTSIZE] = currentsite;
+                histmax = histidx;
+                scrollf = 0;
+                x = 5;
+                y = 1;
+                scroll_current(0);
                 break;
         }
 
@@ -576,7 +592,7 @@ void add_bookmark(struct bookmark *bm, int disable_mem_write) {
         fwrite(bm->name, 255, 1, bmFile);
         fwrite(tmp, 1, 1, bmFile);
         fwrite(bm->url, 1023, 1, bmFile);
-        fwrite(tmp, 2, 1, bmFile);
+        fwrite(tmp, 1, 1, bmFile);
 
         fclose(bmFile);
     }
