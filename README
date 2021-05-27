@@ -8,4 +8,7 @@ so I rewrote it in C in about 3 more hours.
 uses environment vars to determine programs!
 $BROWSER to determine browser
 
+it also supports bookmarks. it will *not* create $HOME/.config
+for you, so *please* make sure you have that directory.
+
 see TODO for what's to come
