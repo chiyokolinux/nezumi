@@ -39,6 +39,7 @@ void hist_next();
 void bookmark_add_prompt();
 void load_bookmarks();
 void add_bookmark(struct bookmark *bm, int disable_mem_write);
+int endswith(const char *str, const char *suffix);
 
 struct simplepage *currentsite = NULL;
 struct simplepage **history = NULL;
@@ -326,7 +327,12 @@ void prompt_url() {
     echo();
     if (getnstr(gotourl, MAXURLLEN - 2) != ERR) {
         attroff(A_REVERSE);
-        load_page(gotourl);
+        if (!endswith(gotourl, "\a\a")) {
+            load_page(gotourl);
+        } else {
+            attroff(A_REVERSE);
+            free(gotourl);
+        }
     } else {
         attroff(A_REVERSE);
         free(gotourl);
@@ -361,7 +367,12 @@ void prompt_index(unsigned int linum) {
     echo();
     if (getnstr(squery, MAXURLLEN - 2) != ERR) {
         attroff(A_REVERSE);
-        currentsite = followprompt(currentsite, linum, squery);
+        if (!endswith(squery, "\a\a")) {
+            currentsite = followprompt(currentsite, linum, squery);
+        } else {
+            attroff(A_REVERSE);
+            free(squery);
+        }
     } else {
         attroff(A_REVERSE);
         free(squery);
@@ -396,7 +407,11 @@ void prompt_download(unsigned int linum) {
     echo();
     if (getnstr(fname, MAXURLLEN - 2) != ERR) {
         attroff(A_REVERSE);
-        followbinary(currentsite, linum, fname);
+        if (!endswith(fname, "\a\a")) {
+            followbinary(currentsite, linum, fname);
+        } else {
+            free(fname);
+        }
     } else {
         free(fname);
     }
@@ -512,11 +527,13 @@ void bookmark_add_prompt() {
     echo();
     if (getnstr(bmname, 254) != ERR) {
         attroff(A_REVERSE);
-        struct bookmark *bm = malloc(sizeof(struct bookmark));
-        strncpy(bm->name, bmname, 255);
-        strncpy(bm->url, currentsite->meta->url, 1022);
-        bm->url[1022] = '\0'; /* ensure null termination */
-        add_bookmark(bm, 0);
+        if (!endswith(bmname, "\a\a")) {
+            struct bookmark *bm = malloc(sizeof(struct bookmark));
+            strncpy(bm->name, bmname, 255);
+            strncpy(bm->url, currentsite->meta->url, 1022);
+            bm->url[1022] = '\0'; /* ensure null termination */
+            add_bookmark(bm, 0);
+        }
     }
     free(bmname);
     attroff(A_REVERSE);
@@ -606,4 +623,15 @@ void add_bookmark(struct bookmark *bm, int disable_mem_write) {
             bookmarks->bookmarks = realloc(bookmarks->bookmarks, sizeof(struct bookmark *) * bookmarks->alloc_length);
         }
     }
+}
+
+/* string ends-with helper function */
+int endswith(const char *str, const char *suffix) {
+    if (!str || !suffix)
+        return 0;
+    int lenstr = strlen(str);
+    int lensuffix = strlen(suffix);
+    if (lensuffix > lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
