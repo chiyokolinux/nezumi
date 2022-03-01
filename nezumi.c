@@ -135,7 +135,7 @@ void mainloop() {
             case KEY_DOWN:
                 if (y < LINES - 2) {
                     y++;
-                } else if ((unsigned)scrollf + (unsigned)LINES <= currentsite->meta->linecount) {
+                } else if ((unsigned)scrollf + (unsigned)LINES - 1 <= currentsite->meta->linecount) {
                     scroll_current(++scrollf);
                 }
                 move(LINES - 1, 0);
@@ -436,7 +436,7 @@ void scroll_current(unsigned int factor) {
 
         if (currentsite->lines[factor]->ltype == error) {
             attron(COLOR_PAIR(1));
-        } else if (currentsite->lines[factor]->ltype != information) {
+        } else if (currentsite->lines[factor]->ltype != information && currentsite->lines[i]->ltype != plain) {
             attron(COLOR_PAIR(3));
         }
 
@@ -482,7 +482,7 @@ void load_page(char *url) {
 
         if (gsite->lines[i]->ltype == error) {
             attron(COLOR_PAIR(1));
-        } else if (gsite->lines[i]->ltype != information) {
+        } else if (gsite->lines[i]->ltype != information && gsite->lines[i]->ltype != plain) {
             attron(COLOR_PAIR(3));
         }
 

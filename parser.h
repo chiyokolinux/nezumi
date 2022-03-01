@@ -44,7 +44,8 @@ enum linetype {
     hyperlink,
     document,
     soundfile,
-    bookmark
+    bookmark,
+    plain
 };
 
 struct typedline {

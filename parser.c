@@ -87,7 +87,9 @@ struct simplepage *parsegopher(char **responsetext, struct pageinfo *metadata) {
                 addstr(metadata->path);
                 addstr(" ( at ");
                 addstr(metadata->url);
-                addstr(" ) contains unknown line type!");
+                addstr(" ) contains unknown line type '");
+                addch(responsetext[i][0]);
+                addstr("'!");
                 refresh();
                 ltype = error;
                 break;
@@ -128,8 +130,8 @@ struct simplepage *parseplain(char **responsetext, struct pageinfo *metadata) {
     unsigned int i;
 
     for (i = 0; i < metadata->linecount; i++) {
-        /* in plain text, everything is of type information */
-        enum linetype ltype = information;
+        /* in plain text, everything is of type plain */
+        enum linetype ltype = plain;
 
         struct typedline *cline = malloc(sizeof(struct typedline));
 
@@ -192,7 +194,10 @@ void freesimplepage(struct simplepage *to_free, int free_struct_itself) {
     unsigned int i;
     for (i = 0; i < to_free->meta->linecount; i++) {
         if (to_free->lines[i]->ltype != bookmark) /* DO NOT MESS WITH OUR BOOKMARKS! */
-            free(to_free->lines[i]->text - 1);
+            /* ltype information is no longer assigned to lines parsed from plain text
+               files as they do not have a type char before the content start that needs
+               to be free()'d as well, while gopher information lines do. */
+            free(to_free->lines[i]->text - (to_free->lines[i]->ltype != plain));
     }
 
     /* free top-level struct data */
