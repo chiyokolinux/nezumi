@@ -137,6 +137,7 @@ char **loadgopher(struct pageinfo *target) {
 
         if (!strcmp(lines[current_line_idx - 1], ".")) {
             at_end = 1;
+            current_line_idx -= 1;
         }
 
         /* write line count */
@@ -258,6 +259,9 @@ void loadbinary(struct pageinfo *target, char *destpath) {
             }
         }
     }
+
+    /* chmod output file */
+    fchmod(outfd, 0644);
 
     /* close socket and output file */
     close(sockfd);
@@ -438,9 +442,6 @@ struct simplepage *followplain(struct simplepage *current, unsigned int linum) {
     }
 
     struct simplepage *parsedfinal = parseplain(lines, meta);
-
-    /* fix for final dot being rendered */
-    parsedfinal->meta->linecount--;
 
     return parsedfinal;
 }
