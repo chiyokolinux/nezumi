@@ -103,7 +103,7 @@ void set_header_text(char text[]) {
     i += strlen(text);
     for (; i < COLS; i++)
         header_new[i] = ' ';
-    header_new[i] = '\0';
+    header_new[i - 1] = '\0';
 
     attron(A_REVERSE);
     mvwaddstr(stdscr, 0, 0, header_new);
@@ -310,7 +310,7 @@ void prompt_url() {
     strcpy(prompt, "open url:");
     for (; i < COLS; i++)
         prompt[i] = ' ';
-    prompt[i] = '\0';
+    prompt[i - 1] = '\0';
 
     move(LINES - 1, 0);
     clrtoeol();
@@ -350,7 +350,7 @@ void prompt_index(unsigned int linum) {
     strcpy(prompt, "search query:");
     for (; i < COLS; i++)
         prompt[i] = ' ';
-    prompt[i] = '\0';
+    prompt[i - 1] = '\0';
 
     move(LINES - 1, 0);
     clrtoeol();
@@ -390,7 +390,7 @@ void prompt_download(unsigned int linum) {
     strcpy(prompt, "save as:");
     for (; i < COLS; i++)
         prompt[i] = ' ';
-    prompt[i] = '\0';
+    prompt[i - 1] = '\0';
 
     move(LINES - 1, 0);
     clrtoeol();
@@ -510,7 +510,7 @@ void bookmark_add_prompt() {
     strcpy(prompt, "bookmark name:");
     for (; i < COLS; i++)
         prompt[i] = ' ';
-    prompt[i] = '\0';
+    prompt[i - 1] = '\0';
 
     move(LINES - 1, 0);
     clrtoeol();
