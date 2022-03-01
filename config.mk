@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with nezumi.  If not, see <https://www.gnu.org/licenses/>.
 
-VERSION = 1.4
+VERSION = 1.5
 NAME	= nezumi
 
 PREFIX = /usr
